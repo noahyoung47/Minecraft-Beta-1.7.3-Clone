@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minecraft Web Prototype</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div id="overlay">
+    <p>
+      Use WASD to move, Space to jump, Shift to sneak and climb down ladders. Click to
+      mine/place blocks, number keys 1‑9 and 0 or mouse wheel to change selected block.
+      <br />Hold mouse and look around. Press the backtick (`) key to toggle debug info.
+      <br />Torches emit light, ladders let you climb, redstone torches power pistons, sticky pistons and TNT.
+      Cacti and sugar cane spawn naturally; touching cacti causes damage. Snow appears in cold
+      biomes, and rain or snow may occur depending on the weather. Sticky pistons push blocks when powered
+      and pull them back when the redstone signal turns off. Falling from a height will
+      injure you. Hostile mobs (zombies, skeletons and creepers) spawn at night: zombies chase you up
+      close, skeletons shoot arrows from a distance, and creepers silently approach and explode when near you.
+      Avoid their blasts and survive as long as you can!
+    </p>
+  </div>
+  <div id="health"></div>
+  <div id="hud"></div>
+  <div id="crosshair"></div>
+  <div id="debug"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.154.0/three.min.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

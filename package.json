@@ -1,0 +1,31 @@
+{
+  "name": "minecraft-web-prototype",
+  "version": "1.0.0",
+  "description": "A Minecraft-like voxel world prototype built with Three.js",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "live-server --host=localhost --port=3000 --open=/",
+    "start": "live-server --host=localhost --port=3000 --open=/",
+    "build": "echo 'Building project...' && cp -r src/* dist/ && cp index.html dist/",
+    "test": "echo 'No tests specified'",
+    "lint": "echo 'Linting JavaScript files...'",
+    "clean": "rm -rf dist/",
+    "setup": "mkdir -p dist"
+  },
+  "keywords": [
+    "minecraft",
+    "threejs",
+    "voxel",
+    "webgl",
+    "game"
+  ],
+  "author": "Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

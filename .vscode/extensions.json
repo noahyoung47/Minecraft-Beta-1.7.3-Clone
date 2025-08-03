@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-json",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "ms-vscode.js-debug-nightly",
+    "ritwickdey.liveserver"
+  ]
+}
