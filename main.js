@@ -1829,9 +1829,8 @@ window.addEventListener('DOMContentLoaded', () => {
       case 'Digit8': if (HOTBAR_SLOTS.length > 7) { selectedSlot = 7; updateHotbar(selectedSlot); } break;
       case 'Digit9': if (HOTBAR_SLOTS.length > 8) { selectedSlot = 8; updateHotbar(selectedSlot); } break;
       case 'Digit0': if (HOTBAR_SLOTS.length > 9) { selectedSlot = 9; updateHotbar(selectedSlot); } break;
-      case 'Backquote':
-        // Toggle debug overlay when the backtick/tilde key is pressed. F3 is
-        // reserved by many browsers for find in page so we use this key instead.
+      case 'F3':
+        // Toggle debug overlay when F3 is pressed, mirroring Minecraft beta.
         debugVisible = !debugVisible;
         debugDiv.style.display = debugVisible ? 'block' : 'none';
         break;

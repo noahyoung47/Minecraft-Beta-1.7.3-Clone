@@ -65,4 +65,12 @@ export class DebugOverlay {
       this.debugElement.style.display = 'none';
     }
   }
+
+  /**
+   * Ensure overlay visibility matches HUD state without altering toggle state
+   */
+  updateHUDVisibility(hudVisible) {
+    if (!this.debugElement) return;
+    this.debugElement.style.display = hudVisible && this.visible ? 'block' : 'none';
+  }
 }

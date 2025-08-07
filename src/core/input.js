@@ -14,11 +14,14 @@ export class InputManager {
     this.hotbar = hotbar;
     this.debugOverlay = debugOverlay;
     this.healthSystem = healthSystem;
-    
+
     this.pointerLocked = false;
     this.overlay = document.getElementById('overlay');
+    this.crosshair = document.getElementById('crosshair');
     this.canvas = null;
-    
+
+    this.hudVisible = true;
+
     this.setupEventListeners();
   }
 
@@ -183,10 +186,16 @@ export class InputManager {
         case 'Digit8': this.hotbar.selectSlot(7); break;
         case 'Digit9': this.hotbar.selectSlot(8); break;
         case 'Digit0': this.hotbar.selectSlot(9); break;
-        
-        // Debug toggle
-        case 'Backquote':
+
+        // Debug toggle (F3)
+        case 'F3':
           this.debugOverlay.toggle();
+          this.debugOverlay.updateHUDVisibility(this.hudVisible);
+          break;
+
+        // HUD toggle (F1)
+        case 'F1':
+          this.toggleHUD();
           break;
       }
     });
@@ -218,6 +227,29 @@ export class InputManager {
         this.hotbar.prevSlot();
       }
     }, { passive: false });
+  }
+
+  /**
+   * Toggle HUD visibility (hotbar, health, crosshair and debug overlay)
+   */
+  toggleHUD() {
+    this.hudVisible = !this.hudVisible;
+
+    if (this.hudVisible) {
+      this.hotbar.show();
+      this.healthSystem.show();
+      if (this.crosshair) {
+        this.crosshair.style.display = 'block';
+      }
+    } else {
+      this.hotbar.hide();
+      this.healthSystem.hide();
+      if (this.crosshair) {
+        this.crosshair.style.display = 'none';
+      }
+    }
+
+    this.debugOverlay.updateHUDVisibility(this.hudVisible);
   }
 
   /**
