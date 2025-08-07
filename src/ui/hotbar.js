@@ -9,13 +9,14 @@ export class HotbarUI {
   constructor() {
     this.selectedSlot = 0;
     this.hudElement = document.getElementById('hud');
+    this.visible = true;
   }
 
   /**
    * Update hotbar display
    */
   update() {
-    if (!this.hudElement) return;
+    if (!this.hudElement || !this.visible) return;
     
     this.hudElement.innerHTML = '';
     
@@ -70,5 +71,33 @@ export class HotbarUI {
    */
   getSelectedSlot() {
     return this.selectedSlot;
+  }
+
+  /**
+   * Show the hotbar
+   */
+  show() {
+    this.visible = true;
+    if (this.hudElement) {
+      this.hudElement.style.display = 'flex';
+    }
+    this.update();
+  }
+
+  /**
+   * Hide the hotbar
+   */
+  hide() {
+    this.visible = false;
+    if (this.hudElement) {
+      this.hudElement.style.display = 'none';
+    }
+  }
+
+  /**
+   * Toggle hotbar visibility
+   */
+  toggleVisibility() {
+    this.visible ? this.hide() : this.show();
   }
 }
