@@ -18,6 +18,7 @@ import { World } from './world/world.js';
 // Entity systems
 import { Player } from './entities/player.js';
 import { MobManager } from './entities/mobs.js';
+import { Hand } from './entities/hand.js';
 
 // Weather systems
 import { WeatherSystem } from './weather/weather.js';
@@ -39,6 +40,7 @@ class MinecraftGame {
     this.camera = null;
     this.world = null;
     this.player = null;
+    this.hand = null;
     this.mobManager = null;
     this.weatherSystem = null;
     this.inputManager = null;
@@ -97,7 +99,9 @@ class MinecraftGame {
    */
   setupScene() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(DAY_COLOR, 0.025);
+    // Linear fog for a cleaner "render distance cliff" look
+    // 2 chunks view distance = 32 blocks. Start fog at 16, end at 32.
+    this.scene.fog = new THREE.Fog(DAY_COLOR, 20, 48);
   }
 
   /**
@@ -138,6 +142,7 @@ class MinecraftGame {
    */
   setupPlayer() {
     this.player = new Player(this.camera, this.world);
+    this.hand = new Hand(this.camera);
   }
 
   /**
@@ -186,7 +191,8 @@ class MinecraftGame {
       this.hotbar,
       this.debugOverlay,
       this.healthSystem,
-      this.blockPicker
+      this.blockPicker,
+      this.hand
     );
     this.inputManager.setCanvas(this.renderer.domElement);
   }
@@ -239,6 +245,7 @@ class MinecraftGame {
       // Update player
       const damagePlayerFn = this.inputManager.createDamagePlayerFunction();
       this.player.update(dt, damagePlayerFn);
+      this.hand.update(dt);
       
       // Update world systems
       this.world.updateChunks(this.player.pos.x, this.player.pos.z);
@@ -296,6 +303,9 @@ class MinecraftGame {
     
     this.renderer.setClearColor(skyColor);
     this.scene.fog.color.copy(skyColor);
+
+    // In Beta 1.7.3, void was often black or dark blue, but clear color handles the sky.
+    // We could add a gradient dome here, but simple color + linear fog is a big step up.
   }
 
   /**

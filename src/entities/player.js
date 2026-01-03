@@ -39,6 +39,7 @@ export class Player {
     this.onGround = false;
     this.fallStartY = this.pos.y;
     this.falling = false;
+    this.inWater = false;
 
     // View bobbing state
     this.bobbingTime = 0;
@@ -115,37 +116,76 @@ export class Player {
    * Update physics (gravity, jumping, climbing)
    */
   updatePhysics(dt, damagePlayerFn) {
-    // Check for ladders
+    // Check current block environment
     const footX = Math.floor(this.pos.x);
     const footY = Math.floor(this.pos.y);
     const footZ = Math.floor(this.pos.z);
-    const headY = Math.floor(this.pos.y + PLAYER_HEIGHT - 0.1);
+    const headY = Math.floor(this.pos.y + PLAYER_HEIGHT * 0.8); // Eye level ish
     
-    const onLadder = (this.world.getBlock(footX, footY, footZ) === 18) ||
-                     (this.world.getBlock(footX, headY, footZ) === 18);
+    const footBlock = this.world.getBlock(footX, footY, footZ);
+    const headBlock = this.world.getBlock(footX, headY, footZ);
+
+    const onLadder = (footBlock === 18) || (headBlock === 18);
+    this.inWater = (footBlock === 7) || (headBlock === 7);
 
     if (onLadder) {
-      this.vel.y = 0;
-      const climbSpeed = 3;
-      
-      if (this.keys.jump) {
-        this.pos.y += climbSpeed * dt;
-      } else if (this.keys.sprint) {
-        this.pos.y -= climbSpeed * dt;
-      }
-      
-      this.onGround = false;
+      this.handleLadderPhysics(dt);
+    } else if (this.inWater) {
+      this.handleWaterPhysics(dt);
     } else {
-      this.vel.y -= GRAVITY * dt;
+      this.handleNormalPhysics(dt);
     }
+
+    this.updatePosition(dt, damagePlayerFn);
+  }
+
+  handleLadderPhysics(dt) {
+    this.vel.y = 0;
+    const climbSpeed = 3;
+
+    if (this.keys.jump) {
+      this.pos.y += climbSpeed * dt;
+    } else if (this.keys.sprint) {
+      this.pos.y -= climbSpeed * dt;
+    }
+    this.onGround = false;
+    this.falling = false;
+  }
+
+  handleWaterPhysics(dt) {
+    // Water physics: reduced gravity, drag, swim up
+    const waterGravity = GRAVITY * 0.2;
+    const swimSpeed = 3;
+
+    // Apply reduced gravity
+    this.vel.y -= waterGravity * dt;
+
+    // Apply drag to vertical velocity
+    this.vel.y *= 0.8;
+
+    // Swim up
+    if (this.keys.jump) {
+      this.vel.y += swimSpeed * dt;
+      // Cap upward velocity
+      if (this.vel.y > 2) this.vel.y = 2;
+    }
+
+    // Apply drag to horizontal velocity
+    this.vel.x *= 0.8;
+    this.vel.z *= 0.8;
+
+    this.onGround = false;
+    this.falling = false;
+  }
+
+  handleNormalPhysics(dt) {
+    this.vel.y -= GRAVITY * dt;
 
     // Jumping
     if (this.keys.jump && this.onGround) {
       this.vel.y = JUMP_SPEED;
       this.onGround = false;
     }
-
-    this.updatePosition(dt, damagePlayerFn);
   }
 
   /**

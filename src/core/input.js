@@ -8,13 +8,14 @@ import { SENSITIVITY } from '../core/config.js';
 import { raycastVoxel } from '../utils/raycast.js';
 
 export class InputManager {
-  constructor(player, world, hotbar, debugOverlay, healthSystem, blockPicker) {
+  constructor(player, world, hotbar, debugOverlay, healthSystem, blockPicker, hand) {
     this.player = player;
     this.world = world;
     this.hotbar = hotbar;
     this.debugOverlay = debugOverlay;
     this.healthSystem = healthSystem;
     this.blockPicker = blockPicker;
+    this.hand = hand;
 
     this.pointerLocked = false;
     this.overlay = document.getElementById('overlay');
@@ -103,6 +104,11 @@ export class InputManager {
       if (event.button === 0 || event.button === 2) {
         event.preventDefault();
         this.handleBlockInteraction(event.button === 0);
+
+        // Swing hand animation on click
+        if (this.hand) {
+          this.hand.swing();
+        }
       }
     });
 
