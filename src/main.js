@@ -1,7 +1,7 @@
 /**
- * Minecraft Web Prototype - Main Application
+ * Minecraft Beta 1.7.3 Clone - Main Application
  * 
- * A Minecraft-like voxel world prototype built with Three.js.
+ * A Minecraft Beta 1.7.3 clone built with Three.js.
  * Features terrain generation, dynamic chunk loading, block placement/destruction,
  * first-person controls, day/night cycle, weather, mobs, and redstone mechanics.
  */

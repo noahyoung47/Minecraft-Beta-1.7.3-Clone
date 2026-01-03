@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Minecraft Web Prototype - Development Server Startup Script
+# Minecraft Beta 1.7.3 Clone - Development Server Startup Script
 # This script starts a local development server for easy testing
 
-echo "🎮 Starting Minecraft Web Prototype Development Server..."
+echo "🎮 Starting Minecraft Beta 1.7.3 Clone Development Server..."
 echo "📍 Server will be available at: http://localhost:3000"
 echo "🚀 Press Ctrl+C to stop the server"
 echo ""
