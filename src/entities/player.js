@@ -32,7 +32,7 @@ export class Player {
       left: false,
       right: false,
       jump: false,
-      sprint: false
+      sneak: false
     };
     
     // Physics state
@@ -95,7 +95,7 @@ export class Player {
 
     let dir = new THREE.Vector3();
     if (moveX !== 0 || moveZ !== 0) {
-      const speed = WALK_SPEED * (this.keys.sprint ? 1.5 : 1);
+      const speed = WALK_SPEED * (this.keys.sneak ? 0.3 : 1);
       const yawRad = this.yaw;
 
       // Calculate movement direction based on camera yaw
@@ -145,7 +145,7 @@ export class Player {
 
     if (this.keys.jump) {
       this.pos.y += climbSpeed * dt;
-    } else if (this.keys.sprint) {
+    } else if (this.keys.sneak) {
       this.pos.y -= climbSpeed * dt;
     }
     this.onGround = false;
@@ -275,9 +275,12 @@ export class Player {
       this.bobbingTime = 0;
     }
 
+    // Lower camera when sneaking
+    const eyeOffset = this.keys.sneak ? (EYE_HEIGHT - 0.2) : EYE_HEIGHT;
+
     this.camera.position.set(
       this.pos.x + bobX,
-      this.pos.y + EYE_HEIGHT + bobY,
+      this.pos.y + eyeOffset + bobY,
       this.pos.z
     );
     this.camera.rotation.set(this.pitch, this.yaw, 0, 'YXZ');

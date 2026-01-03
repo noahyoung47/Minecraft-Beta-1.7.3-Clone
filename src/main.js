@@ -19,9 +19,11 @@ import { World } from './world/world.js';
 import { Player } from './entities/player.js';
 import { MobManager } from './entities/mobs.js';
 import { Hand } from './entities/hand.js';
+import { ParticleSystem } from './entities/particles.js';
 
 // Weather systems
 import { WeatherSystem } from './weather/weather.js';
+import { CloudSystem } from './weather/clouds.js';
 
 // UI systems
 import { HotbarUI } from './ui/hotbar.js';
@@ -41,8 +43,10 @@ class MinecraftGame {
     this.world = null;
     this.player = null;
     this.hand = null;
+    this.particleSystem = null;
     this.mobManager = null;
     this.weatherSystem = null;
+    this.cloudSystem = null;
     this.inputManager = null;
     
     // UI systems
@@ -135,6 +139,7 @@ class MinecraftGame {
    */
   setupWorld() {
     this.world = new World(this.scene);
+    this.particleSystem = new ParticleSystem(this.scene);
   }
 
   /**
@@ -162,6 +167,7 @@ class MinecraftGame {
    */
   setupWeather() {
     this.weatherSystem = new WeatherSystem(this.scene, this.world);
+    this.cloudSystem = new CloudSystem(this.scene);
   }
 
   /**
@@ -192,7 +198,8 @@ class MinecraftGame {
       this.debugOverlay,
       this.healthSystem,
       this.blockPicker,
-      this.hand
+      this.hand,
+      this.particleSystem
     );
     this.inputManager.setCanvas(this.renderer.domElement);
   }
@@ -257,6 +264,9 @@ class MinecraftGame {
       this.mobManager.updateMobs(dt);
       this.mobManager.updateHostiles(dt, this.player, damagePlayerFn);
       this.mobManager.updateArrows(dt, this.player, damagePlayerFn);
+
+      // Update particles
+      this.particleSystem.update(dt);
     }
 
     // Update day/night cycle
@@ -264,6 +274,7 @@ class MinecraftGame {
     
     // Update weather
     this.weatherSystem.update(dt, this.player.pos);
+    this.cloudSystem.update(dt, this.player.pos);
     
     // Update UI
     this.updateUI();

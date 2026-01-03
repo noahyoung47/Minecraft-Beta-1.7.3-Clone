@@ -8,7 +8,7 @@ import { SENSITIVITY } from '../core/config.js';
 import { raycastVoxel } from '../utils/raycast.js';
 
 export class InputManager {
-  constructor(player, world, hotbar, debugOverlay, healthSystem, blockPicker, hand) {
+  constructor(player, world, hotbar, debugOverlay, healthSystem, blockPicker, hand, particleSystem) {
     this.player = player;
     this.world = world;
     this.hotbar = hotbar;
@@ -16,6 +16,7 @@ export class InputManager {
     this.healthSystem = healthSystem;
     this.blockPicker = blockPicker;
     this.hand = hand;
+    this.particleSystem = particleSystem;
 
     this.pointerLocked = false;
     this.overlay = document.getElementById('overlay');
@@ -133,6 +134,11 @@ export class InputManager {
 
     if (isBreaking) {
       // Left click: break block
+      if (blockType === 24) {
+        // Bedrock is unbreakable
+        return;
+      }
+
       if (blockType === 14) {
         // TNT: explode
         this.world.explode(hit.x, hit.y, hit.z);
@@ -141,6 +147,12 @@ export class InputManager {
         if (blockType === 13 || blockType === 23) {
           this.world.removePistonFacing(hit.x, hit.y, hit.z);
         }
+
+        // Spawn particles
+        if (this.particleSystem) {
+          this.particleSystem.spawnBlockParticles(hit.x, hit.y, hit.z, blockType);
+        }
+
         this.world.setBlock(hit.x, hit.y, hit.z, 0);
       }
     } else if (hit.face) {
@@ -180,7 +192,7 @@ export class InputManager {
         case 'KeyA': this.player.keys.left = true; break;
         case 'KeyD': this.player.keys.right = true; break;
         case 'Space': this.player.keys.jump = true; break;
-        case 'ShiftLeft': this.player.keys.sprint = true; break;
+        case 'ShiftLeft': this.player.keys.sneak = true; break;
         
         // Hotbar selection
         case 'Digit1': this.hotbar.selectSlot(0); break;
@@ -222,7 +234,7 @@ export class InputManager {
         case 'KeyA': this.player.keys.left = false; break;
         case 'KeyD': this.player.keys.right = false; break;
         case 'Space': this.player.keys.jump = false; break;
-        case 'ShiftLeft': this.player.keys.sprint = false; break;
+        case 'ShiftLeft': this.player.keys.sneak = false; break;
       }
     });
   }

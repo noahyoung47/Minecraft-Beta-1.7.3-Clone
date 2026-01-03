@@ -55,6 +55,7 @@ export const BLOCK_TYPES = {
   21: { name: 'Sugar Cane', color: 0x6dc066 },
   22: { name: 'Snow', color: 0xffffff },
   23: { name: 'Sticky Piston', color: 0x9c8544 },
+  24: { name: 'Bedrock', color: 0x333333 }, // Unbreakable bottom layer
 };
 
 // Hotbar block types (what players can place)
