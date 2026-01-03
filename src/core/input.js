@@ -8,12 +8,13 @@ import { SENSITIVITY } from '../core/config.js';
 import { raycastVoxel } from '../utils/raycast.js';
 
 export class InputManager {
-  constructor(player, world, hotbar, debugOverlay, healthSystem) {
+  constructor(player, world, hotbar, debugOverlay, healthSystem, blockPicker) {
     this.player = player;
     this.world = world;
     this.hotbar = hotbar;
     this.debugOverlay = debugOverlay;
     this.healthSystem = healthSystem;
+    this.blockPicker = blockPicker;
 
     this.pointerLocked = false;
     this.overlay = document.getElementById('overlay');
@@ -196,6 +197,14 @@ export class InputManager {
         // HUD toggle (F1)
         case 'F1':
           this.toggleHUD();
+          break;
+
+        // Block Picker toggle (E or B)
+        case 'KeyE':
+        case 'KeyB':
+          if (this.blockPicker) {
+            this.blockPicker.toggle();
+          }
           break;
       }
     });

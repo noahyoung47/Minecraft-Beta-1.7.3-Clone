@@ -8,6 +8,7 @@ import { HOTBAR_SLOTS, BLOCK_TYPES } from '../core/config.js';
 export class HotbarUI {
   constructor() {
     this.selectedSlot = 0;
+    this.slots = [...HOTBAR_SLOTS]; // Create a mutable copy
     this.hudElement = document.getElementById('hud');
     this.visible = true;
   }
@@ -20,16 +21,27 @@ export class HotbarUI {
     
     this.hudElement.innerHTML = '';
     
-    for (let i = 0; i < HOTBAR_SLOTS.length; i++) {
-      const slotType = HOTBAR_SLOTS[i];
+    for (let i = 0; i < this.slots.length; i++) {
+      const slotType = this.slots[i];
       const slot = document.createElement('div');
       slot.className = 'slot' + (i === this.selectedSlot ? ' selected' : '');
       
       const name = BLOCK_TYPES[slotType].name;
       slot.textContent = i + 1;
       slot.style.backgroundColor = '#' + BLOCK_TYPES[slotType].color.toString(16).padStart(6, '0');
+      slot.title = BLOCK_TYPES[slotType].name; // Add tooltip
       
       this.hudElement.appendChild(slot);
+    }
+  }
+
+  /**
+   * Set the block type for a specific slot
+   */
+  setSlot(index, blockType) {
+    if (index >= 0 && index < this.slots.length) {
+      this.slots[index] = blockType;
+      this.update();
     }
   }
 
@@ -37,7 +49,7 @@ export class HotbarUI {
    * Select slot by index
    */
   selectSlot(index) {
-    if (index >= 0 && index < HOTBAR_SLOTS.length) {
+    if (index >= 0 && index < this.slots.length) {
       this.selectedSlot = index;
       this.update();
     }
@@ -47,7 +59,7 @@ export class HotbarUI {
    * Cycle to next slot
    */
   nextSlot() {
-    this.selectedSlot = (this.selectedSlot + 1) % HOTBAR_SLOTS.length;
+    this.selectedSlot = (this.selectedSlot + 1) % this.slots.length;
     this.update();
   }
 
@@ -55,7 +67,7 @@ export class HotbarUI {
    * Cycle to previous slot
    */
   prevSlot() {
-    this.selectedSlot = (this.selectedSlot - 1 + HOTBAR_SLOTS.length) % HOTBAR_SLOTS.length;
+    this.selectedSlot = (this.selectedSlot - 1 + this.slots.length) % this.slots.length;
     this.update();
   }
 
@@ -63,7 +75,7 @@ export class HotbarUI {
    * Get currently selected block type
    */
   getSelectedBlockType() {
-    return HOTBAR_SLOTS[this.selectedSlot];
+    return this.slots[this.selectedSlot];
   }
 
   /**

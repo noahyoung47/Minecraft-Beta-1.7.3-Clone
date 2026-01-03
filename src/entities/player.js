@@ -39,6 +39,11 @@ export class Player {
     this.onGround = false;
     this.fallStartY = this.pos.y;
     this.falling = false;
+
+    // View bobbing state
+    this.bobbingTime = 0;
+    this.bobbingAmount = 0.05; // Amplitude of bobbing
+    this.bobbingSpeed = 10;    // Speed of bobbing
   }
 
   /**
@@ -210,9 +215,29 @@ export class Player {
    * Update camera position and rotation
    */
   updateCamera() {
+    // Calculate bobbing offset
+    let bobX = 0;
+    let bobY = 0;
+
+    // Only bob when moving and on ground
+    const isMoving = this.vel.x !== 0 || this.vel.z !== 0;
+    if (isMoving && this.onGround) {
+      // Advance bobbing time
+      this.bobbingTime += 0.015 * this.vel.length(); // Scale by speed
+
+      // Calculate sine wave offsets
+      // Y moves up and down (2x frequency of X)
+      bobY = Math.sin(this.bobbingTime * 2) * this.bobbingAmount;
+      // X moves left and right
+      bobX = Math.cos(this.bobbingTime) * (this.bobbingAmount * 0.5);
+    } else {
+      // Decay bobbing when stopped
+      this.bobbingTime = 0;
+    }
+
     this.camera.position.set(
-      this.pos.x, 
-      this.pos.y + EYE_HEIGHT, 
+      this.pos.x + bobX,
+      this.pos.y + EYE_HEIGHT + bobY,
       this.pos.z
     );
     this.camera.rotation.set(this.pitch, this.yaw, 0, 'YXZ');

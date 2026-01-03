@@ -26,6 +26,8 @@ import { WeatherSystem } from './weather/weather.js';
 import { HotbarUI } from './ui/hotbar.js';
 import { HealthSystem } from './ui/health.js';
 import { DebugOverlay } from './ui/debug.js';
+import { BlockHighlight } from './ui/block_highlight.js';
+import { BlockPickerUI } from './ui/block_picker.js';
 
 // Utilities
 import { clamp } from './utils/helpers.js';
@@ -45,6 +47,8 @@ class MinecraftGame {
     this.hotbar = null;
     this.healthSystem = null;
     this.debugOverlay = null;
+    this.blockHighlight = null;
+    this.blockPicker = null;
     
     // Game state
     this.clock = new THREE.Clock();
@@ -161,11 +165,15 @@ class MinecraftGame {
   setupUI() {
     this.hotbar = new HotbarUI();
     this.hotbar.update();
+
+    this.blockPicker = new BlockPickerUI(this.hotbar);
     
     this.healthSystem = new HealthSystem();
     this.healthSystem.updateDisplay();
     
     this.debugOverlay = new DebugOverlay();
+
+    this.blockHighlight = new BlockHighlight(this.scene, this.camera, this.world);
   }
 
   /**
@@ -177,7 +185,8 @@ class MinecraftGame {
       this.world,
       this.hotbar,
       this.debugOverlay,
-      this.healthSystem
+      this.healthSystem,
+      this.blockPicker
     );
     this.inputManager.setCanvas(this.renderer.domElement);
   }
@@ -317,6 +326,9 @@ class MinecraftGame {
       const weatherStatus = this.weatherSystem.getWeatherStatus();
       this.debugOverlay.update(this.player, weatherStatus);
     }
+
+    // Update block highlight
+    this.blockHighlight.update();
   }
 
   /**
