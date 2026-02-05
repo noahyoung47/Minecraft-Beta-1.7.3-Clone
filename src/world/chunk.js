@@ -94,7 +94,9 @@ export class Chunk {
     // Fill column with blocks
     for (let ly = 0; ly < CHUNK_HEIGHT; ly++) {
       let type = 0;
-      if (ly <= height) {
+      if (ly === 0) {
+        type = 24; // Bedrock at bottom
+      } else if (ly <= height) {
         if (ly === height) {
           // Surface block
           if (isDesert) {

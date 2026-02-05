@@ -1,7 +1,7 @@
 # Project Structure Guide
 
 ## Overview
-This Minecraft Web Prototype has been completely refactored into a clean, modular architecture that's easy to understand, maintain, and extend.
+This Minecraft Beta 1.7.3 Clone has been completely refactored into a clean, modular architecture that's easy to understand, maintain, and extend.
 
 ## Directory Structure
 

@@ -32,13 +32,19 @@ export class Player {
       left: false,
       right: false,
       jump: false,
-      sprint: false
+      sneak: false
     };
     
     // Physics state
     this.onGround = false;
     this.fallStartY = this.pos.y;
     this.falling = false;
+    this.inWater = false;
+
+    // View bobbing state
+    this.bobbingTime = 0;
+    this.bobbingAmount = 0.05; // Amplitude of bobbing
+    this.bobbingSpeed = 10;    // Speed of bobbing
   }
 
   /**
@@ -89,7 +95,7 @@ export class Player {
 
     let dir = new THREE.Vector3();
     if (moveX !== 0 || moveZ !== 0) {
-      const speed = WALK_SPEED * (this.keys.sprint ? 1.5 : 1);
+      const speed = WALK_SPEED * (this.keys.sneak ? 0.3 : 1);
       const yawRad = this.yaw;
 
       // Calculate movement direction based on camera yaw
@@ -110,37 +116,76 @@ export class Player {
    * Update physics (gravity, jumping, climbing)
    */
   updatePhysics(dt, damagePlayerFn) {
-    // Check for ladders
+    // Check current block environment
     const footX = Math.floor(this.pos.x);
     const footY = Math.floor(this.pos.y);
     const footZ = Math.floor(this.pos.z);
-    const headY = Math.floor(this.pos.y + PLAYER_HEIGHT - 0.1);
+    const headY = Math.floor(this.pos.y + PLAYER_HEIGHT * 0.8); // Eye level ish
     
-    const onLadder = (this.world.getBlock(footX, footY, footZ) === 18) ||
-                     (this.world.getBlock(footX, headY, footZ) === 18);
+    const footBlock = this.world.getBlock(footX, footY, footZ);
+    const headBlock = this.world.getBlock(footX, headY, footZ);
+
+    const onLadder = (footBlock === 18) || (headBlock === 18);
+    this.inWater = (footBlock === 7) || (headBlock === 7);
 
     if (onLadder) {
-      this.vel.y = 0;
-      const climbSpeed = 3;
-      
-      if (this.keys.jump) {
-        this.pos.y += climbSpeed * dt;
-      } else if (this.keys.sprint) {
-        this.pos.y -= climbSpeed * dt;
-      }
-      
-      this.onGround = false;
+      this.handleLadderPhysics(dt);
+    } else if (this.inWater) {
+      this.handleWaterPhysics(dt);
     } else {
-      this.vel.y -= GRAVITY * dt;
+      this.handleNormalPhysics(dt);
     }
+
+    this.updatePosition(dt, damagePlayerFn);
+  }
+
+  handleLadderPhysics(dt) {
+    this.vel.y = 0;
+    const climbSpeed = 3;
+
+    if (this.keys.jump) {
+      this.pos.y += climbSpeed * dt;
+    } else if (this.keys.sneak) {
+      this.pos.y -= climbSpeed * dt;
+    }
+    this.onGround = false;
+    this.falling = false;
+  }
+
+  handleWaterPhysics(dt) {
+    // Water physics: reduced gravity, drag, swim up
+    const waterGravity = GRAVITY * 0.2;
+    const swimSpeed = 3;
+
+    // Apply reduced gravity
+    this.vel.y -= waterGravity * dt;
+
+    // Apply drag to vertical velocity
+    this.vel.y *= 0.8;
+
+    // Swim up
+    if (this.keys.jump) {
+      this.vel.y += swimSpeed * dt;
+      // Cap upward velocity
+      if (this.vel.y > 2) this.vel.y = 2;
+    }
+
+    // Apply drag to horizontal velocity
+    this.vel.x *= 0.8;
+    this.vel.z *= 0.8;
+
+    this.onGround = false;
+    this.falling = false;
+  }
+
+  handleNormalPhysics(dt) {
+    this.vel.y -= GRAVITY * dt;
 
     // Jumping
     if (this.keys.jump && this.onGround) {
       this.vel.y = JUMP_SPEED;
       this.onGround = false;
     }
-
-    this.updatePosition(dt, damagePlayerFn);
   }
 
   /**
@@ -210,9 +255,32 @@ export class Player {
    * Update camera position and rotation
    */
   updateCamera() {
+    // Calculate bobbing offset
+    let bobX = 0;
+    let bobY = 0;
+
+    // Only bob when moving and on ground
+    const isMoving = this.vel.x !== 0 || this.vel.z !== 0;
+    if (isMoving && this.onGround) {
+      // Advance bobbing time
+      this.bobbingTime += 0.015 * this.vel.length(); // Scale by speed
+
+      // Calculate sine wave offsets
+      // Y moves up and down (2x frequency of X)
+      bobY = Math.sin(this.bobbingTime * 2) * this.bobbingAmount;
+      // X moves left and right
+      bobX = Math.cos(this.bobbingTime) * (this.bobbingAmount * 0.5);
+    } else {
+      // Decay bobbing when stopped
+      this.bobbingTime = 0;
+    }
+
+    // Lower camera when sneaking
+    const eyeOffset = this.keys.sneak ? (EYE_HEIGHT - 0.2) : EYE_HEIGHT;
+
     this.camera.position.set(
-      this.pos.x, 
-      this.pos.y + EYE_HEIGHT, 
+      this.pos.x + bobX,
+      this.pos.y + eyeOffset + bobY,
       this.pos.z
     );
     this.camera.rotation.set(this.pitch, this.yaw, 0, 'YXZ');

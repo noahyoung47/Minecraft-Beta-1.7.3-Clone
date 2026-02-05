@@ -1,5 +1,5 @@
 /*
- * Minecraft Web Prototype
+ * Minecraft Beta 1.7.3 Clone
  *
  * This file implements a simplified Minecraft‑like game using Three.js.
  * The goal is to demonstrate an infinite voxel world with basic terrain

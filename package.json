@@ -1,7 +1,7 @@
 {
-  "name": "minecraft-web-prototype",
+  "name": "minecraft-beta-1.7.3-clone",
   "version": "1.0.0",
-  "description": "A Minecraft-like voxel world prototype built with Three.js",
+  "description": "A web-based Minecraft Beta 1.7.3 clone built with Three.js",
   "main": "src/main.js",
   "scripts": {
     "dev": "live-server --host=localhost --port=3000 --open=/",

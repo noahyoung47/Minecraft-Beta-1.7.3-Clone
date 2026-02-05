@@ -1,7 +1,7 @@
 /**
- * Minecraft Web Prototype - Main Application
+ * Minecraft Beta 1.7.3 Clone - Main Application
  * 
- * A Minecraft-like voxel world prototype built with Three.js.
+ * A Minecraft Beta 1.7.3 clone built with Three.js.
  * Features terrain generation, dynamic chunk loading, block placement/destruction,
  * first-person controls, day/night cycle, weather, mobs, and redstone mechanics.
  */
@@ -18,14 +18,19 @@ import { World } from './world/world.js';
 // Entity systems
 import { Player } from './entities/player.js';
 import { MobManager } from './entities/mobs.js';
+import { Hand } from './entities/hand.js';
+import { ParticleSystem } from './entities/particles.js';
 
 // Weather systems
 import { WeatherSystem } from './weather/weather.js';
+import { CloudSystem } from './weather/clouds.js';
 
 // UI systems
 import { HotbarUI } from './ui/hotbar.js';
 import { HealthSystem } from './ui/health.js';
 import { DebugOverlay } from './ui/debug.js';
+import { BlockHighlight } from './ui/block_highlight.js';
+import { BlockPickerUI } from './ui/block_picker.js';
 
 // Utilities
 import { clamp } from './utils/helpers.js';
@@ -37,14 +42,19 @@ class MinecraftGame {
     this.camera = null;
     this.world = null;
     this.player = null;
+    this.hand = null;
+    this.particleSystem = null;
     this.mobManager = null;
     this.weatherSystem = null;
+    this.cloudSystem = null;
     this.inputManager = null;
     
     // UI systems
     this.hotbar = null;
     this.healthSystem = null;
     this.debugOverlay = null;
+    this.blockHighlight = null;
+    this.blockPicker = null;
     
     // Game state
     this.clock = new THREE.Clock();
@@ -93,7 +103,9 @@ class MinecraftGame {
    */
   setupScene() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(DAY_COLOR, 0.025);
+    // Linear fog for a cleaner "render distance cliff" look
+    // 2 chunks view distance = 32 blocks. Start fog at 16, end at 32.
+    this.scene.fog = new THREE.Fog(DAY_COLOR, 20, 48);
   }
 
   /**
@@ -127,6 +139,7 @@ class MinecraftGame {
    */
   setupWorld() {
     this.world = new World(this.scene);
+    this.particleSystem = new ParticleSystem(this.scene);
   }
 
   /**
@@ -134,6 +147,7 @@ class MinecraftGame {
    */
   setupPlayer() {
     this.player = new Player(this.camera, this.world);
+    this.hand = new Hand(this.camera);
   }
 
   /**
@@ -153,6 +167,7 @@ class MinecraftGame {
    */
   setupWeather() {
     this.weatherSystem = new WeatherSystem(this.scene, this.world);
+    this.cloudSystem = new CloudSystem(this.scene);
   }
 
   /**
@@ -161,11 +176,15 @@ class MinecraftGame {
   setupUI() {
     this.hotbar = new HotbarUI();
     this.hotbar.update();
+
+    this.blockPicker = new BlockPickerUI(this.hotbar);
     
     this.healthSystem = new HealthSystem();
     this.healthSystem.updateDisplay();
     
     this.debugOverlay = new DebugOverlay();
+
+    this.blockHighlight = new BlockHighlight(this.scene, this.camera, this.world);
   }
 
   /**
@@ -177,7 +196,10 @@ class MinecraftGame {
       this.world,
       this.hotbar,
       this.debugOverlay,
-      this.healthSystem
+      this.healthSystem,
+      this.blockPicker,
+      this.hand,
+      this.particleSystem
     );
     this.inputManager.setCanvas(this.renderer.domElement);
   }
@@ -230,6 +252,7 @@ class MinecraftGame {
       // Update player
       const damagePlayerFn = this.inputManager.createDamagePlayerFunction();
       this.player.update(dt, damagePlayerFn);
+      this.hand.update(dt);
       
       // Update world systems
       this.world.updateChunks(this.player.pos.x, this.player.pos.z);
@@ -241,6 +264,9 @@ class MinecraftGame {
       this.mobManager.updateMobs(dt);
       this.mobManager.updateHostiles(dt, this.player, damagePlayerFn);
       this.mobManager.updateArrows(dt, this.player, damagePlayerFn);
+
+      // Update particles
+      this.particleSystem.update(dt);
     }
 
     // Update day/night cycle
@@ -248,6 +274,7 @@ class MinecraftGame {
     
     // Update weather
     this.weatherSystem.update(dt, this.player.pos);
+    this.cloudSystem.update(dt, this.player.pos);
     
     // Update UI
     this.updateUI();
@@ -287,6 +314,9 @@ class MinecraftGame {
     
     this.renderer.setClearColor(skyColor);
     this.scene.fog.color.copy(skyColor);
+
+    // In Beta 1.7.3, void was often black or dark blue, but clear color handles the sky.
+    // We could add a gradient dome here, but simple color + linear fog is a big step up.
   }
 
   /**
@@ -317,6 +347,9 @@ class MinecraftGame {
       const weatherStatus = this.weatherSystem.getWeatherStatus();
       this.debugOverlay.update(this.player, weatherStatus);
     }
+
+    // Update block highlight
+    this.blockHighlight.update();
   }
 
   /**
